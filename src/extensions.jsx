@@ -6,16 +6,23 @@ import { setClipboard } from 'lacona-api'
 
 import { Command } from 'lacona-phrases'
 import math from 'mathjs'
+// math.config({
+//   number: 'BigNumber'
+// })
 
 function evaluateTex (expression) {
   const node = math.parse(expression)
   const code = node.compile()
-  const result = code.eval()
-  if (result.format) {
-    return [`${node.toTex()} =`, result.format(15)]
-  } else {
-    return [`${node.toTex()} =`, result.toString()]
-  }
+  let result = code.eval()
+
+  // This fixes weird things like sin(pi) not equaling 0
+  try {
+    if (math.equal(result, 0)) {
+      result = 0
+    }
+  } catch (e) {}
+
+  return [`${node.toTex()} =`, math.format(result, {precision: 10})]
 }
 
 function evaluateAnswer (expression) {
@@ -56,7 +63,7 @@ const Calculate = {
   describe () {
     return (
       <sequence>
-        <literal text='calculate ' />
+        <list items={['calculate ', 'compute ']} limit={1} />
         <placeholder argument='expression' id='expression'>
           <freetext filter={isValid} consumeAll />
         </placeholder>
