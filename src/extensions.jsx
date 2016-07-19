@@ -62,7 +62,7 @@ const Calculate = {
   describe ({observe}) {
     return (
       <sequence>
-        <list items={['calculate ', 'compute ']} limit={1} />
+        <list items={['calculate ', 'compute ', 'convert ']} limit={1} />
         <placeholder argument='expression' merge>
           <dynamic describe={input => describeMath(input, observe)} consumeAll />
         </placeholder>
