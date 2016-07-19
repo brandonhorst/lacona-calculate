@@ -32,7 +32,8 @@
     "lacona-api": "^1.0.0",
     "lacona-phrases": "^1.0.0",
     "lodash": "^4.13.1",
-    "mathjs": "^3.3.0"
+    "mathjs": "^3.3.0",
+    "rxjs": "^5.0.0-beta.10"
   },
   "babel": {
     "presets": [

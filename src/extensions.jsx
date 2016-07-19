@@ -6,66 +6,65 @@ import { setClipboard } from 'lacona-api'
 
 import { Command } from 'lacona-phrases'
 import math from 'mathjs'
-// math.config({
-//   number: 'BigNumber'
-// })
+import { fromPromise } from 'rxjs/observable/fromPromise'
 
-function evaluateTex (expression) {
-  const node = math.parse(expression)
-  const code = node.compile()
-  let result = code.eval()
+const MathSource = {
+  clear: true,
+  fetch ({props}) {
+    const promise = Promise.resolve().then(() => {
+      const node = math.parse(props.expression)
+      const code = node.compile()
+      let result = code.eval()
 
-  // This fixes weird things like sin(pi) not equaling 0
-  try {
-    if (math.equal(result, 0)) {
-      result = 0
-    }
-  } catch (e) {}
+      try {
+        if (math.equal(result, 0)) {
+          result = 0
+        }
+      } catch (e) {}
 
-  return [`${node.toTex()} =`, math.format(result, {precision: 10})]
-}
+      return {
+        texExpression: [`${node.toTex()} =`, math.format(result, {precision: 10})],
+        answer: math.format(result, {precision: 10})
+      }
+    }).catch((e) => {
+      console.error(props.expression, e)
+      return null
+    })
 
-function evaluateAnswer (expression) {
-  const node = math.parse(expression)
-  const code = node.compile()
-  const result = code.eval()
-  let answer
-  if (result.format) {
-    return result.format(15)
-  } else {
-    return result.toString()
+    return fromPromise(promise)
   }
 }
 
-function isValid (expression) {
-  try {
-    const output = math.eval(expression)
-    if (_.startsWith(output, 'function ')) {
-      return false
-    } else {
-      return true
-    }
-  } catch (e) {
-    return false
+function describeMath (input, observe) {
+  const data = observe(<MathSource expression={input} />)
+  if (data) {
+    return <literal
+      text={input}
+      value={{
+        texExpression: data.texExpression,
+        answer: data.answer
+      }} />
   }
 }
 
 const Calculate = {
   extends: [Command],
   execute (result) {
-    const answer = evaluateAnswer(result.expression)
-    setClipboard({text: answer})
+    if (result.answer) {
+      setClipboard({text: result.answer})
+    }
   },
   preview (result) {
-    const answer = evaluateTex(result.expression)
-    return {type: 'tex', value: answer}
+    if (result.texExpression) {
+      return {type :'tex', value: result.texExpression}
+    }
   },
-  describe () {
+  describe ({observe}) {
     return (
       <sequence>
         <list items={['calculate ', 'compute ']} limit={1} />
-        <placeholder argument='expression' id='expression'>
-          <freetext filter={isValid} consumeAll />
+        <placeholder argument='expression' merge>
+          <dynamic describe={input => describeMath(input, observe)} consumeAll />
         </placeholder>
       </sequence>
     )
