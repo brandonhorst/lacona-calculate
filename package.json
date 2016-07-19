@@ -1,6 +1,6 @@
 {
   "name": "lacona-calculate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lacona Command for doing arithmetic and unit conversions",
   "scripts": {
     "build": "babel src --out-dir lib",
