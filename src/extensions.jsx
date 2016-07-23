@@ -12,10 +12,13 @@ const MathSource = {
   clear: true,
   fetch ({props}) {
     const promise = Promise.resolve().then(() => {
+      let node
+      let code
+      let result
       try {
-        const node = math.parse(props.expression)
-        const code = node.compile()
-        let result = code.eval()
+        node = math.parse(props.expression)
+        code = node.compile()
+        result = code.eval()
       } catch (e) {
         return
       }
