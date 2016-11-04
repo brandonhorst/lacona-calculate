@@ -1,0 +1,14 @@
+{
+  "calculateHeader": {
+    "type": "header",
+    "examples": [
+      "calculate [34+23](expression)",
+      "calculate [sqrt(e) + sin(pi)](expression)",
+      "calculate [20 lb in kg](expression)"
+    ]
+  },
+  "enableCalculate": {
+    "type": "boolean",
+    "default": true
+  }
+}

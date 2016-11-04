@@ -5,7 +5,7 @@ import { createElement } from 'elliptical'
 import { setClipboard } from 'lacona-api'
 
 import { Command } from 'lacona-phrases'
-import math from 'mathjs'
+const mathjs = require('mathjs')
 import { fromPromise } from 'rxjs/observable/fromPromise'
 
 const MathSource = {
@@ -16,7 +16,7 @@ const MathSource = {
       let code
       let result
       try {
-        node = math.parse(props.expression)
+        node = mathjs.parse(props.expression)
         code = node.compile()
         result = code.eval()
       } catch (e) {
@@ -24,17 +24,17 @@ const MathSource = {
       }
 
       try {
-        if (math.equal(result, 0)) {
+        if (mathjs.equal(result, 0)) {
           result = 0
         }
       } catch (e) {}
 
       return {
-        texExpression: [`${node.toTex()} =`, math.format(result, {precision: 10})],
-        answer: math.format(result, {precision: 10})
+        texExpression: [`${node.toTex()} =`, mathjs.format(result, {precision: 10})],
+        answer: mathjs.format(result, {precision: 10})
       }
     }).catch((e) => {
-      console.error(props.expression, e)
+      console.error('Error calculating', props.expression, e)
       return null
     })
 
@@ -66,15 +66,17 @@ const Calculate = {
       return {type :'tex', value: result.texExpression}
     }
   },
-  describe ({observe}) {
-    return (
-      <sequence>
-        <list items={['calculate ', 'compute ', 'convert ']} limit={1} />
-        <placeholder argument='expression' merge>
-          <dynamic describe={input => describeMath(input, observe)} consumeAll />
-        </placeholder>
-      </sequence>
-    )
+  describe ({observe, config}) {
+    if (config.enableCalculate) {
+      return (
+        <sequence>
+          <list items={['calculate ', 'compute ', 'convert ']} limit={1} />
+          <placeholder argument='expression' merge>
+            <dynamic describe={input => describeMath(input, observe)} consumeAll />
+          </placeholder>
+        </sequence>
+      )
+    }
   }
 }
 
